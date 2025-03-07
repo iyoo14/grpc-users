@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package users;
+
+option go_package = "./pb";
+
+message ListUserRequest {
+  string order = 1;
+  int32  limit = 2;
+};
+message ListUserResponse {
+  repeated DetailUserResponse userList = 1;
+};
+
+message DetailUserRequest {
+  string id = 1;
+};
+
+message DetailUserResponse {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+  int32 age = 4;
+};
+
+service UsersService {
+  rpc ListUser (ListUserRequest) returns (ListUserResponse);
+  rpc DetailUser(DetailUserRequest) returns (DetailUserResponse);
+}
