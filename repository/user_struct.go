@@ -7,6 +7,6 @@ type User struct {
 	Age   interface{} `db:"age"`
 }
 
-type UserListEntiy struct {
+type UserListEntity struct {
 	UserList []User
 }

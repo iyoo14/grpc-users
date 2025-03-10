@@ -18,7 +18,7 @@ type DetailUserRequest struct {
 	ID int
 }
 
-func toListUserResponse(users repository.UserListEntiy) *pb.ListUserResponse {
+func toListUserResponse(users repository.UserListEntity) *pb.ListUserResponse {
 	var us []*pb.DetailUserResponse
 	for _, user := range users.UserList {
 		u := new(pb.DetailUserResponse)
