@@ -22,9 +22,9 @@ enum ORDER_TYPE {
 }
 message ListUserRequest {
   int64 id = 1;
-  ORDER order = 2  [(validate.rules).enum = {defined_only: true, not_in: [0]}];
-  int32  limit = 3 [(validate.rules).int32 = {gte:1, lt: 30}];
-  ORDER_TYPE order_type = 4 [(validate.rules).enum = {defined_only: true, not_in: [0]}];
+  ORDER order = 2  [(validate.rules).enum = {defined_only: true}];
+  int32  limit = 3 [(validate.rules).int32 = {gte:0, lt: 30}];
+  ORDER_TYPE order_type = 4 [(validate.rules).enum = {defined_only: true}];
 };
 
 message ListUserResponse {

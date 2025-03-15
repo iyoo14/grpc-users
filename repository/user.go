@@ -21,7 +21,7 @@ var orderMap = map[int]string{
 }
 
 type UserRepository interface {
-	ListUser(ctx context.Context, id int, order int, limit int, orderType int) (UserListEntity, error)
+	ListUser(ctx context.Context, id int, order int, orderType int, limit int) (UserListEntity, error)
 }
 type userRepository struct {
 	db *sqlx.DB
@@ -31,18 +31,28 @@ func NewUserRepository(db *sqlx.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) ListUser(ctx context.Context, id int, order int, limit int, orderType int) (UserListEntity, error) {
+func (r *userRepository) ListUser(ctx context.Context, id int, order int, orderType int, limit int) (UserListEntity, error) {
 	var record []interface{}
 
+	fmt.Println(id, order, limit)
 	var i = 1
-	query := "SELECT id, name, email, age FROM users "
+	query := "SELECT id, name, email, age FROM users"
 	if id != 0 {
 		query += fmt.Sprintf(" WHERE id = $%d", i)
-		i++
 		record = append(record, id)
+	} else {
+		if order == 0 {
+			order = 1
+		}
+		if orderType == 0 {
+			orderType = 1
+		}
+		if limit == 0 {
+			limit = 30
+		}
+		query += fmt.Sprintf(" ORDER BY %s %s LIMIT $%d", orderMap[order], orderTypeMap[orderType], i)
+		record = append(record, limit)
 	}
-	query = query + fmt.Sprintf(" order by %s %s limit $%d", orderMap[order], orderTypeMap[orderType], i)
-	record = append(record, limit)
 	fmt.Println(query, record)
 	userList, err := r.fetchUsers(query, record...)
 	if err != nil {

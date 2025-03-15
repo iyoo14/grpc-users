@@ -25,7 +25,7 @@ func (c *userController) ListUser(cxt context.Context, req *pb.ListUserRequest) 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	users, err := c.u.ListUser(cxt, int(req.GetId()), int(req.GetOrderType()), int(req.GetOrder()), int(req.GetLimit()))
+	users, err := c.u.ListUser(cxt, int(req.GetId()), int(req.GetOrder()), int(req.GetOrderType()), int(req.GetLimit()))
 	res := toListUserResponse(users)
 	return res, err
 }

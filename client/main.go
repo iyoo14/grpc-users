@@ -21,7 +21,6 @@ func main() {
 
 func callListUser(client pb.UsersServiceClient) {
 	res, err := client.ListUser(context.Background(), &pb.ListUserRequest{
-		Id:        2,
 		Order:     1,
 		OrderType: 1,
 		Limit:     10,
