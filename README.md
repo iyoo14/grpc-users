@@ -19,6 +19,10 @@ validateする場合
 ```
 
 ###  gRPC code 生成
+```
 protoファイル作成後
 > protoc -I. --go_out=. --go-grpc_out=. proto/*.proto
-
+validateする場合
+protoc-gen-validateのパスは適宜合わせる
+> protoc -I. -I=${GOPATH}/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v1.2.1 --go_out=. --validate_out="lang=go:." --go-grpc_out=. proto/*.proto
+```

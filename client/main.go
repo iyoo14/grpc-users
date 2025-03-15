@@ -21,14 +21,16 @@ func main() {
 
 func callListUser(client pb.UsersServiceClient) {
 	res, err := client.ListUser(context.Background(), &pb.ListUserRequest{
-		Order: "id asc",
-		Limit: 10,
+		Id:        2,
+		Order:     1,
+		OrderType: 1,
+		Limit:     10,
 	})
 	if err != nil {
 		log.Fatalln(err)
 	}
 	for _, user := range res.GetUserList() {
 		// Example: Print the user details
-		println(user.GetName(), user.GetEmail(), user.GetAge())
+		println(user.GetId(), user.GetName(), user.GetEmail(), user.GetAge())
 	}
 }

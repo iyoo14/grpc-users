@@ -6,7 +6,7 @@ import (
 )
 
 type UserUsecase interface {
-	ListUser(ctx context.Context, order string, limit int) (repository.UserListEntity, error)
+	ListUser(ctx context.Context, id int, order int, limit int, orderType int) (repository.UserListEntity, error)
 }
 
 type userUsecase struct {
@@ -17,6 +17,6 @@ func NewUserUsecase(ur repository.UserRepository) UserUsecase {
 	return &userUsecase{ur: ur}
 }
 
-func (u *userUsecase) ListUser(ctx context.Context, order string, limit int) (repository.UserListEntity, error) {
-	return u.ur.ListUser(ctx, order, limit)
+func (u *userUsecase) ListUser(ctx context.Context, id int, order int, limit int, orderType int) (repository.UserListEntity, error) {
+	return u.ur.ListUser(ctx, id, order, limit, orderType)
 }

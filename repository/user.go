@@ -7,8 +7,21 @@ import (
 	"log"
 )
 
+var orderTypeMap = map[int]string{
+	1: "ASC",
+	2: "DESC",
+}
+
+var orderMap = map[int]string{
+	1: "id",
+	2: "name",
+	3: "email",
+	4: "age",
+	5: "created_at",
+}
+
 type UserRepository interface {
-	ListUser(ctx context.Context, order string, limit int) (UserListEntity, error)
+	ListUser(ctx context.Context, id int, order int, limit int, orderType int) (UserListEntity, error)
 }
 type userRepository struct {
 	db *sqlx.DB
@@ -18,9 +31,17 @@ func NewUserRepository(db *sqlx.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) ListUser(ctx context.Context, order string, limit int) (UserListEntity, error) {
+func (r *userRepository) ListUser(ctx context.Context, id int, order int, limit int, orderType int) (UserListEntity, error) {
 	var record []interface{}
-	query := fmt.Sprintf("SELECT id, name, email, age FROM users order by %s  limit $1", order)
+
+	var i = 1
+	query := "SELECT id, name, email, age FROM users "
+	if id != 0 {
+		query += fmt.Sprintf(" WHERE id = $%d", i)
+		i++
+		record = append(record, id)
+	}
+	query = query + fmt.Sprintf(" order by %s %s limit $%d", orderMap[order], orderTypeMap[orderType], i)
 	record = append(record, limit)
 	fmt.Println(query, record)
 	userList, err := r.fetchUsers(query, record...)

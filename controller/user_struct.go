@@ -2,21 +2,10 @@ package controller
 
 import (
 	"grpc-users/model"
+	//"grpc-users/model"
 	"grpc-users/pb"
 	"grpc-users/repository"
 )
-
-type ListUserRequest struct {
-	Order string
-	Limit int
-}
-type ListUserResponse struct {
-	UserList []model.User
-}
-
-type DetailUserRequest struct {
-	ID int
-}
 
 func toListUserResponse(users repository.UserListEntity) *pb.ListUserResponse {
 	var us []*pb.DetailUserResponse
@@ -31,4 +20,12 @@ func toListUserResponse(users repository.UserListEntity) *pb.ListUserResponse {
 		us = append(us, u)
 	}
 	return &pb.ListUserResponse{UserList: us}
+}
+
+func toUserRequestArg(req *pb.ListUserRequest) *model.ListUserRequest {
+	return &model.ListUserRequest{
+		Order:     string(req.GetOrder()),
+		Limit:     req.GetLimit(),
+		OrderType: int32(req.GetOrderType()),
+	}
 }

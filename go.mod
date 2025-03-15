@@ -3,6 +3,7 @@ module grpc-users
 go 1.23.2
 
 require (
+	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
 	google.golang.org/grpc v1.70.0

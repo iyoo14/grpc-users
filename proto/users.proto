@@ -4,10 +4,29 @@ package users;
 
 option go_package = "./pb";
 
+import "validate/validate.proto";
+
+enum ORDER {
+  UNKNOWN_ORDER = 0;
+  ORDER_ID = 1;
+  ORDER_NAME = 2;
+  ORDER_EMAIL = 3;
+  ORDER_AGE = 4;
+  ORDER_CREATED_AT = 5;
+}
+
+enum ORDER_TYPE {
+  UNKNOWN_ORDER_TYPE = 0;
+  ORDER_TYPE_ASC = 1;
+  ORDER_TYPE_DESC = 2;
+}
 message ListUserRequest {
-  string order = 1;
-  int32  limit = 2;
+  int64 id = 1;
+  ORDER order = 2  [(validate.rules).enum = {defined_only: true, not_in: [0]}];
+  int32  limit = 3 [(validate.rules).int32 = {gte:1, lt: 30}];
+  ORDER_TYPE order_type = 4 [(validate.rules).enum = {defined_only: true, not_in: [0]}];
 };
+
 message ListUserResponse {
   repeated DetailUserResponse userList = 1;
 };

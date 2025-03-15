@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"grpc-users/pb"
 	"grpc-users/usecase"
 )
@@ -19,7 +21,11 @@ func NewUserController(u usecase.UserUsecase) UserController {
 }
 
 func (c *userController) ListUser(cxt context.Context, req *pb.ListUserRequest) (*pb.ListUserResponse, error) {
-	users, err := c.u.ListUser(cxt, req.GetOrder(), int(req.GetLimit()))
+	err := req.Validate()
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	users, err := c.u.ListUser(cxt, int(req.GetId()), int(req.GetOrderType()), int(req.GetOrder()), int(req.GetLimit()))
 	res := toListUserResponse(users)
 	return res, err
 }
