@@ -4,6 +4,7 @@ import (
 	"context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"grpc-users/pb"
 	"log"
 )
@@ -20,7 +21,10 @@ func main() {
 }
 
 func callListUser(client pb.UsersServiceClient) {
-	res, err := client.ListUser(context.Background(), &pb.ListUserRequest{
+	md := metadata.New(map[string]string{"authorization": "Bearer test-token"})
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
+
+	res, err := client.ListUser(ctx, &pb.ListUserRequest{
 		Order:     1,
 		OrderType: 1,
 		Limit:     10,

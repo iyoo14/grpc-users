@@ -4,7 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"grpc-users/controller"
 	"grpc-users/infra"
 	"grpc-users/pb"
@@ -52,13 +57,17 @@ func (*server) ListUser(ctx context.Context, req *pb.ListUserRequest) (*pb.ListU
 			},
 		}
 	*/
-	exe, _ := os.Executable()
-	exePath = filepath.Dir(exe)
-	setEnv()
-	db := infra.Connect(dsn)
+	/*
+		exe, _ := os.Executable()
+		exePath = filepath.Dir(exe)
+		setEnv()
+		db := infra.Connect(dsn)
+	*/
+
+	db := ctx.Value("db_connect").(*sqlx.DB)
 	fmt.Println(db)
 
-	fmt.Println("Hello World")
+	//fmt.Println("Hello World")
 	//tr := transaction.NewTransaction(db)
 	ur := repository.NewUserRepository(db)
 	uu := usecase.NewUserUsecase(ur)
@@ -67,13 +76,63 @@ func (*server) ListUser(ctx context.Context, req *pb.ListUserRequest) (*pb.ListU
 	return res, err
 }
 
+type Request struct {
+	Data *pb.ListUserRequest
+}
+
+func authorizeWithRequest(ctx context.Context) (context.Context, error) {
+	// カスタムインターセプターで設定されたリクエストデータを取り出す
+	//fmt.Printf("AuthCtx: %+v\n", ctx)
+	token, err := grpc_auth.AuthFromMD(ctx, "Bearer")
+	if err != nil {
+		fmt.Println("MD error", err)
+		return nil, err
+	}
+	req := ctx.Value("request_data").(*pb.ListUserRequest)
+	fmt.Printf("AuthCtx: %+v\n", req.GetLimit())
+	db := ctx.Value("db_connect").(*sqlx.DB)
+	fmt.Printf("DB: %+v\n", db)
+	if token != "test-token" {
+		fmt.Println("token not match", token)
+		return nil, status.Errorf(codes.Unauthenticated, "Unauthenticated")
+	}
+	return ctx, nil
+}
+
+func dbConnectInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	exe, _ := os.Executable()
+	exePath = filepath.Dir(exe)
+	setEnv()
+	db := infra.Connect(dsn)
+	newCtx := context.WithValue(ctx, "db_connect", db)
+	return handler(newCtx, req)
+}
+
+func requestDataInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+
+	// リクエストデータをコンテキストに保存
+
+	//fmt.Printf("requestdate: %+v\n", req)
+	//fmt.Printf("request order: %+v\n", req.(*pb.ListUserRequest).GetLimit())
+	newCtx := context.WithValue(ctx, "request_data", req.(*pb.ListUserRequest))
+	//fmt.Printf("requestdateCtx: %+v\n", newCtx)
+	return handler(newCtx, req)
+}
+
 func main() {
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				dbConnectInterceptor,
+				requestDataInterceptor,
+				// カスタムインターセプターを最初に実行
+				grpc_auth.UnaryServerInterceptor(authorizeWithRequest), // grpc_auth を実行
+			),
+		))
 	pb.RegisterUsersServiceServer(s, &server{})
 
 	fmt.Println("server listening at localhost:50051")

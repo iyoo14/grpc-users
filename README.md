@@ -16,6 +16,9 @@ bshrc zhrcファイルに
 
 validateする場合
 > go install github.com/envoyproxy/protoc-gen-validate@latest
+
+go-grpc-middlewareがmod tidyでinstallされない
+> go get github.com/grpc-ecosystem/go-grpc-middleware
 ```
 
 ###  gRPC code 生成
