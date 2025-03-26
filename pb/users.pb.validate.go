@@ -59,6 +59,8 @@ func (m *ListUserRequest) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for AccountId
+
 	if _, ok := ORDER_name[int32(m.GetOrder())]; !ok {
 		err := ListUserRequestValidationError{
 			field:  "Order",

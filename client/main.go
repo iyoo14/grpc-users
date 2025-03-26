@@ -21,10 +21,11 @@ func main() {
 }
 
 func callListUser(client pb.UsersServiceClient) {
-	md := metadata.New(map[string]string{"authorization": "Bearer test-token"})
+	md := metadata.New(map[string]string{"authorization": "Bearer test-token!!"})
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 	res, err := client.ListUser(ctx, &pb.ListUserRequest{
+		AccountId: 1,
 		Order:     1,
 		OrderType: 1,
 		Limit:     10,

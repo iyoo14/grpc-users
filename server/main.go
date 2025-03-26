@@ -89,13 +89,18 @@ func authorizeWithRequest(ctx context.Context) (context.Context, error) {
 		return nil, err
 	}
 	req := ctx.Value("request_data").(*pb.ListUserRequest)
-	fmt.Printf("AuthCtx: %+v\n", req.GetLimit())
+	fmt.Printf("AuthCtx: %+v\n", req.GetAccountId())
 	db := ctx.Value("db_connect").(*sqlx.DB)
 	fmt.Printf("DB: %+v\n", db)
-	if token != "test-token" {
+	ar := repository.NewAccountRepository(db)
+	au := usecase.NewAccountUsecase(ar)
+	uc := controller.NewAccountController(au)
+	err = uc.Authorize(ctx, int(req.GetAccountId()), token)
+	if err != nil {
 		fmt.Println("token not match", token)
 		return nil, status.Errorf(codes.Unauthenticated, "Unauthenticated")
 	}
+	fmt.Println("token match", token)
 	return ctx, nil
 }
 
